@@ -26,6 +26,8 @@ export interface Product {
 export interface CartItem extends Product {
   quantity: number;
   size: string;
+  variantId?: string; // ID of the specific variant
+  maxStock?: number; // Maximum inventory available for this item
 }
 
 export interface Category {

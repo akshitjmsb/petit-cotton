@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { calculateTax, PROVINCES } from '../utils/tax';
 
 const CartScreen: React.FC = () => {
     const navigate = useNavigate();
     const { cartItems, removeFromCart, updateQuantity, cartTotal, itemCount } = useCart();
     const [promoCode, setPromoCode] = useState('');
+    const [selectedProvince, setSelectedProvince] = useState<string>('ON'); // Default to Ontario
+
+    const { taxAmount, rate } = calculateTax(cartTotal, selectedProvince);
+    const finalTotal = cartTotal + taxAmount;
 
     return (
         <div className="relative flex flex-col min-h-screen w-full mx-auto shadow-2xl bg-bg-light">
@@ -40,7 +45,7 @@ const CartScreen: React.FC = () => {
                                     <div>
                                         <div className="flex justify-between items-start">
                                             <h3 className="text-base font-semibold leading-tight text-text-main line-clamp-1">{item.name}</h3>
-                                            <p className="text-base font-bold text-text-main">${item.price.toFixed(2)}</p>
+                                            <p className="text-base font-bold text-text-main">${item.price?.toFixed(2)}</p>
                                         </div>
                                         <p className="text-sm text-gray-500 mt-1">{item.category} • {item.size}</p>
                                     </div>
@@ -55,7 +60,7 @@ const CartScreen: React.FC = () => {
                                             <span className="text-sm font-semibold w-4 text-center text-text-main">{item.quantity}</span>
                                             <button
                                                 onClick={() => updateQuantity(item.id, item.size, 1)}
-                                                className="w-6 h-6 flex items-center justify-center rounded-full text-primary bg-white shadow-sm hover:bg-blue-50 transition-colors"
+                                                className={`w-6 h-6 flex items-center justify-center rounded-full text-primary bg-white shadow-sm hover:bg-blue-50 transition-colors ${item.maxStock && item.quantity >= item.maxStock ? 'opacity-50 cursor-not-allowed' : ''}`}
                                             >
                                                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add</span>
                                             </button>
@@ -77,9 +82,24 @@ const CartScreen: React.FC = () => {
                     <>
                         <div className="h-px w-full bg-gray-200 my-2"></div>
 
-                        {/* Promo Code */}
+                        {/* Promo Code - kept simple */}
                         <div className="px-4 py-4">
-                            <label className="block mb-2 text-sm font-medium text-gray-700">Discount Code</label>
+                            <label className="block mb-2 text-sm font-medium text-gray-700">Discount Code / Province</label>
+
+                            {/* Province Selector for Tax */}
+                            <div className="mb-4">
+                                <label className="block text-xs text-gray-500 mb-1">Province (for Tax Estimation)</label>
+                                <select
+                                    value={selectedProvince}
+                                    onChange={(e) => setSelectedProvince(e.target.value)}
+                                    className="block w-full p-2.5 rounded-lg border-gray-200 bg-white text-sm text-text-main focus:ring-2 focus:ring-primary focus:border-transparent"
+                                >
+                                    {PROVINCES.map(p => (
+                                        <option key={p.code} value={p.code}>{p.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
                             <div className="flex gap-2">
                                 <div className="relative flex-1">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -97,22 +117,6 @@ const CartScreen: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Badges */}
-                        <div className="px-4 py-2">
-                            <div className="grid grid-cols-3 gap-2 bg-primary/10 rounded-xl p-4 border border-primary/20">
-                                {[
-                                    { icon: 'eco', label: 'Organic' },
-                                    { icon: 'map', label: 'Canada Made' },
-                                    { icon: 'verified_user', label: 'Secure' }
-                                ].map((badge, idx) => (
-                                    <div key={idx} className={`flex flex-col items-center gap-1 text-center ${idx === 1 ? 'border-l border-r border-blue-100' : ''}`}>
-                                        <span className="material-symbols-outlined text-primary" style={{ fontSize: '24px' }}>{badge.icon}</span>
-                                        <span className="text-[10px] uppercase tracking-wide font-bold text-slate-600">{badge.label}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
                         {/* Summary */}
                         <div className="p-4 mt-2">
                             <h2 className="text-sm font-semibold text-text-main mb-4">Order Summary</h2>
@@ -126,12 +130,12 @@ const CartScreen: React.FC = () => {
                                     <span className="font-medium text-primary">Free</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
-                                    <span className="text-gray-500">Tax</span>
-                                    <span className="font-medium text-text-main">$0.00</span>
+                                    <span className="text-gray-500">Tax ({selectedProvince} @ {(rate * 100).toFixed(1)}%)</span>
+                                    <span className="font-medium text-text-main">${taxAmount.toFixed(2)}</span>
                                 </div>
                                 <div className="pt-3 mt-3 border-t border-gray-100 flex justify-between items-center">
                                     <span className="text-base font-bold text-text-main">Total</span>
-                                    <span className="text-xl font-bold text-text-main">${cartTotal.toFixed(2)}</span>
+                                    <span className="text-xl font-bold text-text-main">${finalTotal.toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>
@@ -155,7 +159,7 @@ const CartScreen: React.FC = () => {
                         <span className="font-bold text-base">Checkout</span>
                         <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold opacity-80 border-r border-black/20 pr-3 mr-1">{itemCount} items</span>
-                            <span className="font-bold text-lg">${cartTotal.toFixed(2)}</span>
+                            <span className="font-bold text-lg">${finalTotal.toFixed(2)}</span>
                             <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform" style={{ fontSize: '20px' }}>arrow_forward</span>
                         </div>
                     </button>
