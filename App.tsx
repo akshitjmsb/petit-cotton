@@ -15,6 +15,8 @@ import ReloadPrompt from './components/ReloadPrompt';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 
+import ProtectedRoute from './components/ProtectedRoute';
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -33,7 +35,14 @@ const App: React.FC = () => {
               {/* Auth Routes */}
               <Route path="/login" element={<LoginScreen />} />
               <Route path="/signup" element={<SignUpScreen />} />
-              <Route path="/profile" element={<ProfileScreen />} />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfileScreen />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
 
               {/* Fallback routes */}
