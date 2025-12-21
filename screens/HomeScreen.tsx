@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
 import { Category } from '../types';
+import NavigationDrawer from '../components/NavigationDrawer';
 
 const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const categories: Category[] = [
     { id: '1', name: 'Rompers', count: '12 items', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD2OEY8-CKcxUQus87bFyimNTyJochCwOMOGJDuWKMK575xBSt50RfRkpQqx-2DKW_1i57o_fdhnkOCDnj5BiZGCUd1aWD09Q8QcoJNoX0ctPYJ9Jw8h_TepQe0QXGU02xjAra__qOyZCab3-n1z2K7mgpfkfolgOZTkwap6lRTQCKz93aotHnMujrpDLD8CQqmRgVGtIoO0O0_d4_7aG5oOuYUTsH5tymdW3semnH-Lc0_8IGkf4uUI4waz4VFkOFylbB77K6_IQ' },
@@ -17,7 +19,10 @@ const HomeScreen: React.FC = () => {
     <div className="relative flex min-h-screen w-full flex-col bg-bg-light pb-24">
       {/* Header */}
       <header className="sticky top-0 z-40 flex items-center bg-bg-light/95 backdrop-blur-md p-4 pb-2 justify-between border-b border-gray-100">
-        <div className="flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer">
+        <div
+          onClick={() => setIsMenuOpen(true)}
+          className="flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+        >
           <span className="material-symbols-outlined text-text-main">menu</span>
         </div>
         <h2 className="text-text-main text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Melilot Baby</h2>
@@ -111,6 +116,9 @@ const HomeScreen: React.FC = () => {
       </div>
 
       <BottomNav />
+
+      {/* Navigation Drawer */}
+      <NavigationDrawer isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </div>
   );
 };
