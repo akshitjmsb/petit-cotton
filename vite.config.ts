@@ -15,6 +15,7 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+        // Mobile manifest (standalone PWA) - desktop manifest is handled separately
         manifest: {
           name: 'Petit Coton',
           short_name: 'PetitCoton',
@@ -35,7 +36,8 @@ export default defineConfig(({ mode }) => {
               type: 'image/png'
             }
           ]
-        }
+        },
+        manifestFilename: 'manifest.webmanifest'
       })
     ],
     define: {
